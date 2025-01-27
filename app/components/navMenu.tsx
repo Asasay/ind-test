@@ -8,11 +8,12 @@ import {
   DropdownMenuTrigger,
 } from "./dropdownMenu";
 import { LogIn } from "lucide-react";
+import { cn } from "../lib/utils";
 
-const NavMenu = () => {
+const NavMenu = ({ className }: { className?: string }) => {
   return (
     <>
-      <ul className="hidden lg:flex  lg:basis-1/3  2xl:basis-1/2  gap-4">
+      <ul className={cn("hidden lg:flex gap-6", className)}>
         <li>
           <Link href="/about">О школе</Link>
         </li>

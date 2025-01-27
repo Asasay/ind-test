@@ -1,6 +1,10 @@
-import { useMediaQuery } from "usehooks-ts";
+"use client";
 import { Carousel, CarouselBullets, CarouselContent, CarouselItem } from "./carousel";
 import FeatureCard from "./featureCard";
+import dynamic from "next/dynamic";
+const MediaQuery = dynamic(() => import("react-responsive"), {
+  ssr: false,
+});
 
 const features = [
   {
@@ -38,11 +42,12 @@ const features = [
 ];
 
 const FeatureCarousel = () => {
-  const smallScreen = useMediaQuery("(max-width: 1536px)");
   return (
     <Carousel opts={{ inViewThreshold: 0.48 }}>
-      {smallScreen && <CarouselBullets className="mb-6" />}
-      <CarouselContent className="-ml-4 select-none">
+      <MediaQuery maxWidth={1536}>
+        <CarouselBullets className="mb-6" />
+      </MediaQuery>
+      <CarouselContent className="select-none pb-2 px-1">
         {features.map((feature, i) => (
           <CarouselItem
             className="basis-full sm:basis-1/2 lg:basis-1/3 2xl:basis-1/4 pl-4  lg:h-64"

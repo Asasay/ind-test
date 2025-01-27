@@ -6,7 +6,6 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 
 import { cn } from "@/app/lib/utils";
 import { Button } from "./button";
-import { useDebounceValue } from "usehooks-ts";
 import { HTMLMotionProps, motion } from "framer-motion";
 
 type CarouselApi = UseEmblaCarouselType[1];
@@ -29,6 +28,8 @@ type CarouselContextProps = {
   scrollTo: (index: number) => void;
   slidesInView: number[];
   slidesCount: number;
+  selectedSnap: number;
+  snapCount: number;
   canScrollPrev: boolean;
   canScrollNext: boolean;
 } & CarouselProps;
@@ -60,6 +61,8 @@ const Carousel = React.forwardRef<
   const [canScrollNext, setCanScrollNext] = React.useState(false);
   const [slidesInView, setSlidesInView] = React.useState([0]);
   const [slidesCount, setSlidesCount] = React.useState(0);
+  const [selectedSnap, setSelectedSnap] = React.useState(0);
+  const [snapCount, setSnapCount] = React.useState(0);
 
   const onSelect = React.useCallback((api: CarouselApi) => {
     if (!api) {
@@ -68,6 +71,8 @@ const Carousel = React.forwardRef<
 
     setSlidesInView(api.slidesInView());
     setSlidesCount(api.slideNodes().length);
+    setSnapCount(api.scrollSnapList().length);
+    setSelectedSnap(api.selectedScrollSnap());
     setCanScrollPrev(api.canScrollPrev());
     setCanScrollNext(api.canScrollNext());
   }, []);
@@ -144,6 +149,8 @@ const Carousel = React.forwardRef<
         scrollTo,
         slidesInView,
         slidesCount,
+        selectedSnap,
+        snapCount,
         canScrollPrev,
         canScrollNext,
       }}
@@ -168,7 +175,10 @@ const CarouselContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HT
     const { carouselRef, orientation } = useCarousel();
 
     return (
-      <div ref={carouselRef} className="overflow-hidden">
+      <div
+        ref={carouselRef}
+        className={orientation === "horizontal" ? "overflow-x-hidden" : "overflow-y-hidden"}
+      >
         <div
           ref={ref}
           className={cn(
@@ -263,39 +273,44 @@ CarouselNext.displayName = "CarouselNext";
 
 const CarouselBullets = React.forwardRef<HTMLDivElement, HTMLMotionProps<"button">>(
   ({ className, ...props }, ref) => {
-    const { slidesCount, slidesInView, api } = useCarousel();
-    const [debouncedSlidesInView] = useDebounceValue(slidesInView, 400);
+    const { selectedSnap, snapCount, scrollTo } = useCarousel();
 
-    const firstSelected = Math.min(...debouncedSlidesInView);
-    const lastSelected = Math.max(...debouncedSlidesInView);
+    const bulletVariants = {
+      selected: {
+        width: 40,
+        transition: { duration: 0.3 },
+      },
+      deselected: {
+        width: 8,
+        transition: { duration: 0.3 },
+      },
+    };
 
-    if (slidesCount <= 1) return null;
+    if (snapCount <= 1) return null;
     return (
       <div ref={ref} className={cn("flex gap-2", className)}>
-        {Array.from({ length: slidesCount }).map((_, i) => {
-          const isFirstSelected = i === firstSelected;
-          const isInSelectedRange = i >= firstSelected && i <= lastSelected;
-          if (!isInSelectedRange || isFirstSelected) {
-            return (
-              <motion.button
-                key={i}
-                className={cn("h-2 rounded-full  bg-[#CCC]", isFirstSelected ? "w-10" : "w-2")}
-                layout
-                transition={{ duration: 0.2 }}
-                onClick={() => api?.scrollTo(i)}
-                disabled={isFirstSelected}
-                {...props}
-              >
-                {isFirstSelected && (
-                  <motion.span
-                    transition={{ duration: 0.2 }}
-                    className="block h-2 w-5 rounded-full bg-[#1C1C1C]"
-                  />
-                )}
-              </motion.button>
-            );
-          }
-          return null;
+        {Array.from({ length: snapCount }).map((_, i) => {
+          const isSelectedBullet = i === selectedSnap;
+          return (
+            <motion.button
+              key={i}
+              className={cn("h-2 rounded-full  bg-[#CCC]")}
+              variants={bulletVariants}
+              animate={isSelectedBullet ? "selected" : "deselected"}
+              onClick={() => scrollTo(i)}
+              disabled={isSelectedBullet}
+              {...props}
+            >
+              {isSelectedBullet && (
+                <motion.span
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: "1.25rem", opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                  className="block h-2 w-5 rounded-full bg-[#1C1C1C]"
+                />
+              )}
+            </motion.button>
+          );
         })}
       </div>
     );

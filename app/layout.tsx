@@ -26,9 +26,9 @@ export default function RootLayout({
       <body className={`${PPNeueMontreal.variable}`}>
         <header className="p-4 border-b border-b-[#E1E1E1]">
           <div className="flex justify-between gap-4 lg:justify-start">
-            <HeaderLogo />
-            <NavMenu />
-            <LoginButton />
+            <HeaderLogo className="lg:basis-1/3  2xl:basis-1/4" />
+            <NavMenu className="lg:basis-1/3  2xl:basis-1/2" />
+            <LoginButton className="lg:basis-1/3 2xl:basis-1/4" />
           </div>
         </header>
         <main className="px-4 py-2">{children}</main>

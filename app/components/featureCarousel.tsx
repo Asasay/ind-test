@@ -43,11 +43,11 @@ const features = [
 
 const FeatureCarousel = () => {
   return (
-    <Carousel opts={{ inViewThreshold: 0.48 }}>
+    <Carousel>
       <MediaQuery maxWidth={1536}>
         <CarouselBullets className="mb-6" />
       </MediaQuery>
-      <CarouselContent className="select-none pb-2 px-1">
+      <CarouselContent wrapperClassName="-mx-1 px-1 -mb-2 pb-2 select-none">
         {features.map((feature, i) => (
           <CarouselItem
             className="basis-full sm:basis-1/2 lg:basis-1/3 2xl:basis-1/4 pl-4  lg:h-64"

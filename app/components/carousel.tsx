@@ -155,7 +155,7 @@ const Carousel = React.forwardRef<
         canScrollNext,
       }}
     >
-      <div
+      <section
         ref={ref}
         onKeyDownCapture={handleKeyDown}
         className={cn("relative", className)}
@@ -164,34 +164,34 @@ const Carousel = React.forwardRef<
         {...props}
       >
         {children}
-      </div>
+      </section>
     </CarouselContext.Provider>
   );
 });
 Carousel.displayName = "Carousel";
 
-const CarouselContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => {
-    const { carouselRef, orientation } = useCarousel();
+const CarouselContent = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & { wrapperClassName?: string }
+>(({ className, wrapperClassName, ...props }, ref) => {
+  const { carouselRef, orientation } = useCarousel();
 
-    return (
+  return (
+    <div
+      ref={carouselRef}
+      className={cn(
+        orientation === "horizontal" ? "overflow-x-hidden" : "overflow-y-hidden",
+        wrapperClassName
+      )}
+    >
       <div
-        ref={carouselRef}
-        className={orientation === "horizontal" ? "overflow-x-hidden" : "overflow-y-hidden"}
-      >
-        <div
-          ref={ref}
-          className={cn(
-            "flex",
-            orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
-            className
-          )}
-          {...props}
-        />
-      </div>
-    );
-  }
-);
+        ref={ref}
+        className={cn("flex", orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col", className)}
+        {...props}
+      />
+    </div>
+  );
+});
 CarouselContent.displayName = "CarouselContent";
 
 const CarouselItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
@@ -294,11 +294,13 @@ const CarouselBullets = React.forwardRef<HTMLDivElement, HTMLMotionProps<"button
           return (
             <motion.button
               key={i}
-              className={cn("h-2 rounded-full  bg-[#CCC]")}
+              className={cn("h-2 rounded-full w-2 bg-[#CCC]")}
               variants={bulletVariants}
               animate={isSelectedBullet ? "selected" : "deselected"}
               onClick={() => scrollTo(i)}
               disabled={isSelectedBullet}
+              aria-current={isSelectedBullet}
+              aria-label={"Go to slide " + (i + 1)}
               {...props}
             >
               {isSelectedBullet && (
